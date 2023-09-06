@@ -12,9 +12,11 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.util.*;
+import java.util.concurrent.Flow;
 
 public class TicTacToe extends Application {
     public static String[][] gameBoard = new String[3][3];
@@ -31,7 +33,6 @@ public class TicTacToe extends Application {
         firstContainer.getChildren().addAll(twoPlayer,vsComp);
         firstContainer.setAlignment(Pos.CENTER);
         firstContainer.setVgap(20);
-
 
 
         GridPane buttonsContainer = new GridPane();
@@ -71,7 +72,7 @@ public class TicTacToe extends Application {
                 int currentRow = row;
                 int currentCol = col;
                 btn.setOnAction(e->{
-                    buttonHandler(currentRow,currentCol,btn,buttonsContainer);
+                    buttonHandler(currentRow,currentCol,btn,buttonsContainer,stage,firstScene);
                 });
                 buttonsContainer.add(btn,col,row);
             }
@@ -85,20 +86,22 @@ public class TicTacToe extends Application {
                 int currentRow = row;
                 int currentCol = col;
                 btn.setOnAction(e->{
-                    compButtonHandler(currentRow,currentCol,btn,secondContainer);
+                    compButtonHandler(currentRow,currentCol,btn,secondContainer,stage,firstScene);
                 });
                 secondContainer.add(btn,col,row);
             }
         }
+        stage.setTitle("TIC-TAC-TOE");
         stage.setScene(firstScene);
         stage.show();
     }
 
-    private static void compButtonHandler(int row, int column , Button btn, GridPane container){
+    private static void compButtonHandler(int row, int column , Button btn, GridPane container,Stage stage,
+                                          Scene firstScene){
         if (btn.getText().isEmpty()){
             btn.setText(currentPlayer);
             gameBoard[row][column] = currentPlayer;
-            disableButtons(container);
+            disableButtons(container,stage,firstScene);
             if (currentPlayer == "X"){
                 currentPlayer = "O";
             }
@@ -108,7 +111,7 @@ public class TicTacToe extends Application {
 
             if (!checkWin() && !checkDraw(container)) {
                 System.out.println("yes");
-                playTurnComp(container);
+                playTurnComp(container,stage,firstScene);
             }
             else{
                 System.out.println("NO");
@@ -116,7 +119,7 @@ public class TicTacToe extends Application {
         }
     }
 
-    private static void playTurnComp(GridPane container) {
+    private static void playTurnComp(GridPane container,Stage stage,Scene firstScene) {
         if (!checkDraw(container) && !checkWin()) {
             List<Node> emptyButtonsList = new ArrayList<>();
             for (Node n : container.getChildren()) {
@@ -137,7 +140,7 @@ public class TicTacToe extends Application {
 
                 gameBoard[row][col] = currentPlayer;
 
-                disableButtons(container);
+                disableButtons(container,stage,firstScene);
 
                 if (currentPlayer.equals("X")) {
                     currentPlayer = "O";
@@ -155,13 +158,13 @@ public class TicTacToe extends Application {
         }
     }
 
-    public static void buttonHandler(int row, int column, Button btn, GridPane container){
+    public static void buttonHandler(int row, int column, Button btn, GridPane container,Stage stage,Scene firstScene){
         System.out.println("Button clickedL: "+currentPlayer);
 
         if (btn.getText().isEmpty()){
             btn.setText(currentPlayer);
             gameBoard[row][column] = currentPlayer;
-            disableButtons(container);
+            disableButtons(container,stage,firstScene);
 //            checkDraw(container);
             System.out.println("Button dabane par currentPlayer: "+ currentPlayer);
             if (currentPlayer == "X"){
@@ -224,7 +227,7 @@ public class TicTacToe extends Application {
     }
 
 
-    private static void disableButtons(GridPane container){
+    private static void disableButtons(GridPane container,Stage stage,Scene firstScene){
         if (checkWin() || checkDraw(container)) {
             for (Node n : container.getChildren()) {
                 if (n instanceof Button) {
@@ -234,7 +237,7 @@ public class TicTacToe extends Application {
 
                 }
             }
-            showRespectiveDialog(container);
+            showRespectiveDialog(container,stage,firstScene);
         }
         else{
             System.out.println("checkwin and checkdraw false!");
@@ -242,14 +245,14 @@ public class TicTacToe extends Application {
 
 
     }
-    private static void showRespectiveDialog(GridPane container){
+    private static void showRespectiveDialog(GridPane container,Stage stage,Scene firstScene){
         if (checkWin()){
-            showPlayAgainDialog(container);
+            showPlayAgainDialog(container,stage,firstScene);
         } else if (checkDraw(container)) {
-            showDrawDialog(container);
+            showDrawDialog(container,stage,firstScene);
         }
     }
-    private static void showDrawDialog(GridPane container){
+    private static void showDrawDialog(GridPane container,Stage stage,Scene firstScene){
         if (checkDraw(container)) {
             Alert drawDialog = new Alert(Alert.AlertType.CONFIRMATION);
             drawDialog.setTitle("Draw!");
@@ -265,11 +268,12 @@ public class TicTacToe extends Application {
                 resetGame(container);
                 currentPlayer = "X";
             } else {
-                System.out.println("Ty");
+                stage.setScene(firstScene);
+                resetGame(container);
             }
         }
     }
-    private static void showPlayAgainDialog(GridPane container){
+    private static void showPlayAgainDialog(GridPane container, Stage stage, Scene firstScene){
         if (checkWin()) {
             Alert playAgainDialog = new Alert(Alert.AlertType.CONFIRMATION);
             playAgainDialog.setTitle("Game Over!");
@@ -286,6 +290,8 @@ public class TicTacToe extends Application {
             }
             else {
                 System.out.println("Thanks");
+                stage.setScene(firstScene);
+                resetGame(container);
             }
         }
     }
